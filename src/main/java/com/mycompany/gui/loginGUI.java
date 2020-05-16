@@ -5,6 +5,9 @@
  */
 package com.mycompany.gui;
 
+import java.awt.FlowLayout;
+import javax.swing.JPanel;
+
 /**
  *
  * @author Admin
@@ -127,6 +130,9 @@ public class loginGUI extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
+        successGUI s = new successGUI();
+        s.setVisible(true);
+        
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jPasswordField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jPasswordField1ActionPerformed
