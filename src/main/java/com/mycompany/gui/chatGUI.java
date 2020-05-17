@@ -276,6 +276,7 @@ public class chatGUI extends javax.swing.JFrame {
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
 
         if (checkExistance(jTextField2.getText(),listOnl) != -1){
+            jLabel1.setText(jTextField2.getText());
             //Begin connection here
         }
         else {
