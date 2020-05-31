@@ -45,7 +45,7 @@ public class SocketClienExample {
                 new  InputStreamReader (socket.getInputStream()));
             PrintWriter output = 
                     new PrintWriter(socket.getOutputStream(), true);
-            output.println("2quithu165-quithu-192.168.15");
+            output.println("2quithu165-quithu-192.168.5");
             String echoString = input.readLine();
             System.out.println("Received server input: " + echoString);
             

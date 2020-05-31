@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.File;
-import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -169,7 +168,7 @@ public final class Echoer extends Thread {
         }
 
     }
-
+//REGISTER HERE%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     private static void register(String echoString, PrintWriter output)
             throws ParserConfigurationException, TransformerException {
         String name;
@@ -224,6 +223,9 @@ public final class Echoer extends Thread {
             user.appendChild(
                     newElement(doc, "friends", null)
             );
+            user.appendChild(
+                    newElement(doc, "status", "1")
+            );
 
             root.appendChild(user);
 
@@ -242,9 +244,13 @@ public final class Echoer extends Thread {
 
         }
     }
-
+    
+//END OF REGISTER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////    
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+//LOGIN HERE%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     private static void authenticate(String echoString, PrintWriter output)
-            throws SAXException, ParserConfigurationException, IOException {
+            throws SAXException, ParserConfigurationException, IOException, TransformerException {
         String name;
         String pass;
         String ip;
@@ -263,7 +269,7 @@ public final class Echoer extends Thread {
         while (echoString.charAt(curPos) != '-') {
             curPos++;
         }
-        
+
         if ((curPos - 1) == 1) {
             pass = String.valueOf(echoString.charAt(curPos - 1));
         } else {
@@ -274,6 +280,9 @@ public final class Echoer extends Thread {
 //        System.out.println(name);
 //        System.out.println(pass);
 //        System.out.println(ip);
+
+        addNewUserIP(ip, name);
+
         String fileName = "src/data/" + name + ".xml";
         File userFile = new File(fileName);
 
@@ -298,24 +307,27 @@ public final class Echoer extends Thread {
             Node node2 = elem.getElementsByTagName("port").item(0);
 
             int numberOfFriend = elem.getElementsByTagName("friends").getLength();
-            String port = node2.getTextContent();
+            String message = node2.getTextContent();
             // login successfully, send back its listen port
             if (passFile.equals(pass)) {
 
                 System.out.println("Login!!!");
                 updateStatus(name, "1");
-                port = port + "%" + numberOfFriend + "%";
+                message = message + "%" + numberOfFriend + "%";
                 Node friend;
                 String friendName;
-                char status;
+                String friendIP;
+                String friendPort;                
+                String status;
                 for (int i = 0; i < numberOfFriend; i++) {
                     friend = elem.getElementsByTagName("friends").item(i);
                     friendName = friend.getTextContent();
-                    status = friendName.charAt(0);
-                    friendName = friendName.substring(1, friendName.length());
-                    port = port + status+"%"+friendName + "-";
+                    status = getFriendStatus(friendName);
+                    friendIP = getFriendIP(friendName);
+                    friendPort = getFriendPort(friendName);
+                    message = message+ status + friendName + "-" + friendIP + "-" + friendPort + "%";
                 }
-                output.println(port);
+                output.println(message);
 
             } else {
 
@@ -327,7 +339,134 @@ public final class Echoer extends Thread {
         }
 
     }
+    
+    
+        public static void addNewUserIP(String ip, String name) throws SAXException, ParserConfigurationException, IOException, TransformerException {
+        String fileName = "src/data/ip.xml";
+        File userFile = new File(fileName);
+        boolean flag = true;
+        DocumentBuilderFactory factory
+                = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = factory.newDocumentBuilder();
+        Document doc = dBuilder.parse(userFile);
+        doc.getDocumentElement().normalize();
+        NodeList nList = doc.getElementsByTagName("ip");
+        //Get first element
+        Node nNode = nList.item(0);
+        Element elem = (Element) nNode;
+        NodeList nE = elem.getElementsByTagName("user");
+        int length = nE.getLength();
+        for (int i = 0; i < length; i++){
+            Node n1 = nE.item(i);
+            Element x = (Element) n1;
+            Node n2 = x.getElementsByTagName("username").item(0);
+            String nameField = n2.getTextContent();
+            System.out.println(nameField);
+            if (nameField.equals(name)){
+                System.out.println("Occur");
+                flag = false;
+            }
+        }
+        
+        if (!flag) {
+        } else {
+            Element user = doc.createElement("user");
 
+            user.setAttribute("name", name);
+            user.appendChild(
+                    newElement(doc, "ip", ip)
+            );
+            user.appendChild(
+                    newElement(doc, "username", name)
+            );
+//        System.out.println("Step 3");
+
+            elem.appendChild(user);
+
+            TransformerFactory transformerFactory
+                    = TransformerFactory.newInstance();
+            Transformer transf = transformerFactory.newTransformer();
+
+            transf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transf.setOutputProperty(OutputKeys.INDENT, "yes");
+
+            DOMSource source = new DOMSource(doc);
+
+            StreamResult file = new StreamResult(userFile);
+
+            transf.transform(source, file);
+        }
+    }
+    
+    public static String getFriendStatus(String username) throws ParserConfigurationException, SAXException, IOException{
+        String result = null;
+         String fileName = "src/data/" + username + ".xml";
+        File userFile = new File(fileName);
+        DocumentBuilderFactory factory
+                = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = factory.newDocumentBuilder();
+        Document doc = dBuilder.parse(userFile);
+        doc.getDocumentElement().normalize();
+        NodeList nList = doc.getElementsByTagName("user");
+        Node nNode = nList.item(0);
+        Element elem = (Element) nNode;
+        // get length
+        Node n1 = elem.getElementsByTagName("port").item(0);
+        result = n1.getTextContent();
+        return result;
+    }    
+        
+    public static String getFriendIP(String username) throws SAXException, ParserConfigurationException, IOException{
+        String result = null;
+        String fileName = "src/data/ip.xml";
+        File userFile = new File(fileName);
+        boolean flag = true;
+        DocumentBuilderFactory factory
+                = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = factory.newDocumentBuilder();
+        Document doc = dBuilder.parse(userFile);
+        doc.getDocumentElement().normalize();
+        NodeList nList = doc.getElementsByTagName("ip");
+        //Get first element
+        Node nNode = nList.item(0);
+        Element elem = (Element) nNode;
+        NodeList nE = elem.getElementsByTagName("user");
+        int length = nE.getLength();
+        for (int i = 0; i < length; i++){
+            Node n1 = nE.item(i);
+            Element x = (Element) n1;
+            Node n2 = x.getElementsByTagName("username").item(0);
+            String nameField = n2.getTextContent();
+            System.out.println(nameField);
+            if (nameField.equals(username)){
+                Node n3 = x.getElementsByTagName("ip").item(0);
+                result = n3.getTextContent();
+                break;
+            }
+        }
+        return result;
+        
+    }
+    
+    public static String getFriendPort(String username) throws SAXException, IOException, ParserConfigurationException{
+        String result = null;
+         String fileName = "src/data/" + username + ".xml";
+        File userFile = new File(fileName);
+        DocumentBuilderFactory factory
+                = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = factory.newDocumentBuilder();
+        Document doc = dBuilder.parse(userFile);
+        doc.getDocumentElement().normalize();
+        NodeList nList = doc.getElementsByTagName("user");
+        Node nNode = nList.item(0);
+        Element elem = (Element) nNode;
+        // get length
+        Node n1 = elem.getElementsByTagName("port").item(0);
+        result = n1.getTextContent();
+        return result;
+        
+    }
+    //END OF LOGIN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     private static int getPort(String name) {
 
         int port = 0;
@@ -404,4 +543,6 @@ public final class Echoer extends Thread {
 
     }
 
+
 }
+
