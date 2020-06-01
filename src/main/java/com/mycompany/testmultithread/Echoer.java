@@ -64,91 +64,20 @@ public final class Echoer extends Thread {
                     break;
                 case '3': // request to send message
 
-                    String receiver = echoString.substring(1);
-                    String fileName = "src/data/" + receiver + ".xml";
-                    File userFile = new File(fileName);
-
-                    // user exists
-                    if (userFile.isFile()) {
-
-                        DocumentBuilderFactory factory
-                                = DocumentBuilderFactory.newInstance();
-                        DocumentBuilder dBuilder = factory.newDocumentBuilder();
-                        Document doc = dBuilder.parse(userFile);
-
-                        doc.getDocumentElement().normalize();
-
-                        NodeList nList = doc.getElementsByTagName("user");
-                        Node nNode = nList.item(0);
-
-                        Element elem = (Element) nNode;
-                        Node node = elem.getElementsByTagName("port").item(0);
-                        String port = node.getTextContent();
-
-                        System.out.printf("Port: %s%n", port);
-
-                        output.println(port);
-
-                        // user not exist
-                    } else {
-                        System.out.printf("User not found");
-
-                        output.println("-1");
-                    }
-
+                    String username = echoString.substring(1);
+                    findPerson(username,output);
                     break;
                 case '4':
-                    String name;
-                    String friend;
-                    int curPos = 0;
-
-                    while (echoString.charAt(curPos) != '-') {
-                        curPos++;
-                    }
-                    name = echoString.substring(1, curPos);
-
-                    friend = echoString.substring(curPos + 1);
-
-                    if (name.equals(friend)) {
-                        output.println("-1");
-                    } else {
-
-                        String fName = "src/data/" + friend + ".xml";
-                        File fFile = new File(fName);
-
-                        // friend exists
-                        if (fFile.isFile()) {
-
-                            DocumentBuilderFactory factory
-                                    = DocumentBuilderFactory.newInstance();
-                            DocumentBuilder dBuilder = factory.newDocumentBuilder();
-                            Document doc = dBuilder.parse(fFile);
-
-                            doc.getDocumentElement().normalize();
-
-                            NodeList nList = doc.getElementsByTagName("user");
-                            Node nNode = nList.item(0);
-
-                            Element elem = (Element) nNode;
-                            Node node = elem.getElementsByTagName("friends").item(0);
-
-                            // System.out.printf("Port: %s%n", port);
-                            output.println("1");
-
-                            // friend not exist
-                        } else {
-                            System.out.printf("Friend not found");
-
-                            output.println("-1");
-                        }
-                    }
-
+                   
+                    addFriend(echoString, output);
                     break;
                 case '5':
-                    System.out.println("Log out");
-                    String username = echoString.substring(1, echoString.length() - 1);
-                    updateStatus(username, "0");
+                    System.out.println("Test");
+                  
+                    addFriendtoFile("src/data/quithu165.xml","src/data/thuyduong123.xml");
+    
                     break;
+
                 default:
                     break;
             }
@@ -170,7 +99,7 @@ public final class Echoer extends Thread {
     }
 //REGISTER HERE%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     private static void register(String echoString, PrintWriter output)
-            throws ParserConfigurationException, TransformerException {
+            throws ParserConfigurationException, TransformerException, SAXException, IOException {
         String name;
         String pass;
 
@@ -221,7 +150,7 @@ public final class Echoer extends Thread {
                     newElement(doc, "port", port)
             );
             user.appendChild(
-                    newElement(doc, "friends", null)
+                    newElement(doc, "friends", "quithu165")
             );
             user.appendChild(
                     newElement(doc, "status", "1")
@@ -241,7 +170,7 @@ public final class Echoer extends Thread {
             StreamResult file = new StreamResult(myFile);
 
             transf.transform(source, file);
-
+            
         }
     }
     
@@ -341,7 +270,7 @@ public final class Echoer extends Thread {
     }
     
     
-        public static void addNewUserIP(String ip, String name) throws SAXException, ParserConfigurationException, IOException, TransformerException {
+    public static void addNewUserIP(String ip, String name) throws SAXException, ParserConfigurationException, IOException, TransformerException {
         String fileName = "src/data/ip.xml";
         File userFile = new File(fileName);
         boolean flag = true;
@@ -467,6 +396,74 @@ public final class Echoer extends Thread {
         
     }
     //END OF LOGIN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    //BEGIN OF FINDPERSON%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    public static void findPerson(String username, PrintWriter output) throws SAXException, IOException, ParserConfigurationException{
+        String fileName = "src/data/" + username + ".xml";
+        File personFile = new File(fileName);
+        if (!personFile.isFile() ){
+            output.print("0");
+        }
+        else {
+            String message = null;
+            String status;
+            String port;
+            String ip;
+            status = getFriendStatus(username);
+            port = getFriendPort(username);
+            ip = getFriendIP(username);
+            
+            if (status.equals("0")) {
+                output.println("0");
+            }
+            else 
+                message = ip + "-" + port;
+                output.println(message);
+            
+        }
+    }
+    //END OF FINDPERSON%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    //BEGIN OF ADDFRIEND%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    public static void addFriend(String message, PrintWriter output){
+        String host;
+        String friend;
+
+        int curPos = 1;
+
+        while (message.charAt(curPos) != '-') {
+            curPos++;
+        }
+        if ((curPos - 1) == 1) {
+            host = String.valueOf(message.charAt(curPos - 1));
+        } else {
+            host = message.substring(1, curPos);
+        }
+        curPos++;
+        friend = message;
+        
+        
+    }
+    public static void addFriendtoFile(String filename, String friendname) throws SAXException, IOException, ParserConfigurationException{
+        File hostFile = new File(filename);
+        DocumentBuilderFactory factory
+                = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = factory.newDocumentBuilder();
+        Document doc = dBuilder.parse(hostFile);
+        doc.getDocumentElement().normalize();
+        NodeList nList = doc.getElementsByTagName("user");
+        Node nNode = nList.item(0);
+        Element elem = (Element) nNode;
+        System.out.println("test 1");
+        elem.appendChild(
+                    newElement(doc, "friend", friendname)
+            );
+        doc.appendChild(elem);
+        System.out.println("test 2");
+        
+            
+    }
+    //END OF ADDFRIEND%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     private static int getPort(String name) {
 
         int port = 0;
