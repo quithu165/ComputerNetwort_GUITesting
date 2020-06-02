@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <info xmlns="Information">
-    <user id="5001">
+        
+    <user id="5002">
+                
         <username>thuyduong123</username>
-        <pass>quithu-192.168.5</pass>
-        <port>5001</port>
-        <friends/>
+                
+        <pass>quithu</pass>
+                
+        <port>5002</port>
+                
+        <friends>
+            <friendname>quithu165</friendname>
+        </friends>
+                
         <status>1</status>
+            
     </user>
+    
 </info>

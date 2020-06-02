@@ -65,17 +65,17 @@ public final class Echoer extends Thread {
                 case '3': // request to send message
 
                     String username = echoString.substring(1);
-                    findPerson(username,output);
+                    findPerson(username, output);
                     break;
                 case '4':
-                   
+
                     addFriend(echoString, output);
                     break;
                 case '5':
                     System.out.println("Test");
-                  
-                    addFriendtoFile("src/data/quithu165.xml","src/data/thuyduong123.xml");
-    
+
+                    addFriendtoFile("quithu15", "thuyduong123");
+
                     break;
 
                 default:
@@ -98,6 +98,7 @@ public final class Echoer extends Thread {
 
     }
 //REGISTER HERE%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     private static void register(String echoString, PrintWriter output)
             throws ParserConfigurationException, TransformerException, SAXException, IOException {
         String name;
@@ -150,7 +151,7 @@ public final class Echoer extends Thread {
                     newElement(doc, "port", port)
             );
             user.appendChild(
-                    newElement(doc, "friends", "quithu165")
+                    newElement(doc, "friends", null)
             );
             user.appendChild(
                     newElement(doc, "status", "1")
@@ -170,10 +171,10 @@ public final class Echoer extends Thread {
             StreamResult file = new StreamResult(myFile);
 
             transf.transform(source, file);
-            
+
         }
     }
-    
+
 //END OF REGISTER%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////    
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////  
@@ -234,8 +235,9 @@ public final class Echoer extends Thread {
             String passFile = node1.getTextContent();
             // get listen port of user
             Node node2 = elem.getElementsByTagName("port").item(0);
-
-            int numberOfFriend = elem.getElementsByTagName("friends").getLength();
+            NodeList fList = elem.getElementsByTagName("friends");
+            Element f = (Element) fList.item(0);
+            int numberOfFriend = f.getElementsByTagName("friendname").getLength();
             String message = node2.getTextContent();
             // login successfully, send back its listen port
             if (passFile.equals(pass)) {
@@ -246,15 +248,15 @@ public final class Echoer extends Thread {
                 Node friend;
                 String friendName;
                 String friendIP;
-                String friendPort;                
+                String friendPort;
                 String status;
                 for (int i = 0; i < numberOfFriend; i++) {
-                    friend = elem.getElementsByTagName("friends").item(i);
+                    friend = f.getElementsByTagName("friendname").item(i);
                     friendName = friend.getTextContent();
                     status = getFriendStatus(friendName);
                     friendIP = getFriendIP(friendName);
                     friendPort = getFriendPort(friendName);
-                    message = message+ status + friendName + "-" + friendIP + "-" + friendPort + "%";
+                    message = message + status + friendName + "-" + friendIP + "-" + friendPort + "%";
                 }
                 output.println(message);
 
@@ -268,8 +270,7 @@ public final class Echoer extends Thread {
         }
 
     }
-    
-    
+
     public static void addNewUserIP(String ip, String name) throws SAXException, ParserConfigurationException, IOException, TransformerException {
         String fileName = "src/data/ip.xml";
         File userFile = new File(fileName);
@@ -285,18 +286,18 @@ public final class Echoer extends Thread {
         Element elem = (Element) nNode;
         NodeList nE = elem.getElementsByTagName("user");
         int length = nE.getLength();
-        for (int i = 0; i < length; i++){
+        for (int i = 0; i < length; i++) {
             Node n1 = nE.item(i);
             Element x = (Element) n1;
             Node n2 = x.getElementsByTagName("username").item(0);
             String nameField = n2.getTextContent();
             System.out.println(nameField);
-            if (nameField.equals(name)){
+            if (nameField.equals(name)) {
                 System.out.println("Occur");
                 flag = false;
             }
         }
-        
+
         if (!flag) {
         } else {
             Element user = doc.createElement("user");
@@ -326,10 +327,10 @@ public final class Echoer extends Thread {
             transf.transform(source, file);
         }
     }
-    
-    public static String getFriendStatus(String username) throws ParserConfigurationException, SAXException, IOException{
+
+    public static String getFriendStatus(String username) throws ParserConfigurationException, SAXException, IOException {
         String result = null;
-         String fileName = "src/data/" + username + ".xml";
+        String fileName = "src/data/" + username + ".xml";
         File userFile = new File(fileName);
         DocumentBuilderFactory factory
                 = DocumentBuilderFactory.newInstance();
@@ -340,12 +341,12 @@ public final class Echoer extends Thread {
         Node nNode = nList.item(0);
         Element elem = (Element) nNode;
         // get length
-        Node n1 = elem.getElementsByTagName("port").item(0);
+        Node n1 = elem.getElementsByTagName("status").item(0);
         result = n1.getTextContent();
         return result;
-    }    
-        
-    public static String getFriendIP(String username) throws SAXException, ParserConfigurationException, IOException{
+    }
+
+    public static String getFriendIP(String username) throws SAXException, ParserConfigurationException, IOException {
         String result = null;
         String fileName = "src/data/ip.xml";
         File userFile = new File(fileName);
@@ -361,25 +362,25 @@ public final class Echoer extends Thread {
         Element elem = (Element) nNode;
         NodeList nE = elem.getElementsByTagName("user");
         int length = nE.getLength();
-        for (int i = 0; i < length; i++){
+        for (int i = 0; i < length; i++) {
             Node n1 = nE.item(i);
             Element x = (Element) n1;
             Node n2 = x.getElementsByTagName("username").item(0);
             String nameField = n2.getTextContent();
             System.out.println(nameField);
-            if (nameField.equals(username)){
+            if (nameField.equals(username)) {
                 Node n3 = x.getElementsByTagName("ip").item(0);
                 result = n3.getTextContent();
                 break;
             }
         }
         return result;
-        
+
     }
-    
-    public static String getFriendPort(String username) throws SAXException, IOException, ParserConfigurationException{
+
+    public static String getFriendPort(String username) throws SAXException, IOException, ParserConfigurationException {
         String result = null;
-         String fileName = "src/data/" + username + ".xml";
+        String fileName = "src/data/" + username + ".xml";
         File userFile = new File(fileName);
         DocumentBuilderFactory factory
                 = DocumentBuilderFactory.newInstance();
@@ -393,18 +394,18 @@ public final class Echoer extends Thread {
         Node n1 = elem.getElementsByTagName("port").item(0);
         result = n1.getTextContent();
         return result;
-        
+
     }
+
     //END OF LOGIN%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     //BEGIN OF FINDPERSON%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    public static void findPerson(String username, PrintWriter output) throws SAXException, IOException, ParserConfigurationException{
+    public static void findPerson(String username, PrintWriter output) throws SAXException, IOException, ParserConfigurationException {
         String fileName = "src/data/" + username + ".xml";
         File personFile = new File(fileName);
-        if (!personFile.isFile() ){
+        if (!personFile.isFile()) {
             output.print("0");
-        }
-        else {
+        } else {
             String message = null;
             String status;
             String port;
@@ -412,23 +413,25 @@ public final class Echoer extends Thread {
             status = getFriendStatus(username);
             port = getFriendPort(username);
             ip = getFriendIP(username);
-            
+
             if (status.equals("0")) {
                 output.println("0");
-            }
-            else 
+            } else {
                 message = ip + "-" + port;
-                output.println(message);
-            
+            }
+            output.println(message);
+
         }
     }
     //END OF FINDPERSON%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+
     //BEGIN OF ADDFRIEND%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    public static void addFriend(String message, PrintWriter output){
+    public static void addFriend(String message, PrintWriter output) throws SAXException, IOException, ParserConfigurationException, ParserConfigurationException, TransformerException {
         String host;
         String friend;
-
+        String ip;
+        String port;
+        String status;
         int curPos = 1;
 
         while (message.charAt(curPos) != '-') {
@@ -440,12 +443,19 @@ public final class Echoer extends Thread {
             host = message.substring(1, curPos);
         }
         curPos++;
-        friend = message;
-        
-        
+        friend = message.substring(curPos);
+        addFriendtoFile(host,friend);
+        ip = getFriendIP(friend);
+        port = getFriendPort(friend);
+        status = getFriendStatus(friend);
+        output.println(ip+"%"+port+"%"+status);
     }
-    public static void addFriendtoFile(String filename, String friendname) throws SAXException, IOException, ParserConfigurationException{
-        File hostFile = new File(filename);
+
+    public static void addFriendtoFile(String filename, String friendname) throws SAXException, IOException, ParserConfigurationException, TransformerException {
+
+        String fileName = "src/data/" + filename + ".xml";
+        File hostFile = new File(fileName);
+        //if (!hostFile.isFile()) System.out.println("1");
         DocumentBuilderFactory factory
                 = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = factory.newDocumentBuilder();
@@ -453,16 +463,36 @@ public final class Echoer extends Thread {
         doc.getDocumentElement().normalize();
         NodeList nList = doc.getElementsByTagName("user");
         Node nNode = nList.item(0);
+        //System.out.println(nNode.getTextContent());
         Element elem = (Element) nNode;
-        System.out.println("test 1");
-        elem.appendChild(
-                    newElement(doc, "friend", friendname)
-            );
-        doc.appendChild(elem);
-        System.out.println("test 2");
         
-            
+        NodeList fList = doc.getElementsByTagName("friends");
+        Node fNode = fList.item(0);
+        //System.out.println(nNode.getTextContent());
+        Element f = (Element) fNode;
+        
+        
+        Element newFriend = doc.createElement("name");
+
+        f.appendChild(
+                newElement(doc, "friendname", friendname)
+        );
+        
+         TransformerFactory transformerFactory
+                    = TransformerFactory.newInstance();
+            Transformer transf = transformerFactory.newTransformer();
+
+            transf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transf.setOutputProperty(OutputKeys.INDENT, "yes");
+
+            DOMSource source = new DOMSource(doc);
+
+            StreamResult file = new StreamResult(hostFile);
+
+            transf.transform(source, file);
+
     }
+
     //END OF ADDFRIEND%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     private static int getPort(String name) {
 
@@ -540,6 +570,4 @@ public final class Echoer extends Thread {
 
     }
 
-
 }
-
